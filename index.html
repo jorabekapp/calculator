@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Kalkulyator</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kalkulyator" />
+  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; width: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; }
+    #install-banner { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(82,130,255,0.15); backdrop-filter: blur(12px); border-top: 1px solid rgba(82,130,255,0.3); padding: 14px 20px; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; z-index: 999; }
+    #install-banner p { color: #fff; font-size: 14px; flex: 1; }
+    #install-banner p span { font-weight: 600; color: #7eb3ff; }
+    #install-btn { background: linear-gradient(135deg, #5282ff, #a855f7); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    #dismiss-btn { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 22px; cursor: pointer; }
+    .calculator { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; padding: 20px; width: min(340px, 96vw); box-shadow: 0 30px 70px rgba(0,0,0,0.6); }
+    .display { background: rgba(0,0,0,0.35); border-radius: 18px; padding: 18px 16px 14px; margin-bottom: 18px; text-align: right; min-height: 96px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
+    .expression { color: rgba(255,255,255,0.4); font-size: 13px; min-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .result { color: #ffffff; font-size: clamp(28px, 8vw, 38px); font-weight: 300; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: -0.5px; }
+    .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    button { border: none; border-radius: 16px; font-size: clamp(16px, 5vw, 20px); font-weight: 500; height: clamp(56px, 13vw, 68px); cursor: pointer; transition: transform 0.1s ease, opacity 0.1s ease; outline: none; user-select: none; }
+    button:active { transform: scale(0.91); opacity: 0.85; }
+    .btn-num { background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.07); }
+    .btn-num:hover { background: rgba(255,255,255,0.17); }
+    .btn-op { background: rgba(82,130,255,0.22); color: #7eb3ff; border: 1px solid rgba(82,130,255,0.18); }
+    .btn-op:hover { background: rgba(82,130,255,0.38); }
+    .btn-eq { background: linear-gradient(135deg, #5282ff, #a855f7); color: #ffffff; }
+    .btn-eq:hover { opacity: 0.88; }
+    .btn-clear { background: rgba(255,80,80,0.18); color: #ff7070; border: 1px solid rgba(255,80,80,0.14); }
+    .btn-clear:hover { background: rgba(255,80,80,0.32); }
+    .btn-zero { grid-column: span 2; }
+  </style>
+</head>
+<body>
+<div id="install-banner">
+  <p>📲 <span>Kalkulyator</span>ni qurilmangizga o'rnating!</p>
+  <button id="install-btn">O'rnatish</button>
+  <button id="dismiss-btn">✕</button>
+</div>
+<div class="calculator">
+  <div class="display">
+    <div class="expression" id="expression"></div>
+    <div class="result" id="result">0</div>
+  </div>
+  <div class="buttons">
+    <button class="btn-clear" onclick="clearAll()">AC</button>
+    <button class="btn-clear" onclick="backspace()">⌫</button>
+    <button class="btn-op" onclick="appendOp('%')">%</button>
+    <button class="btn-op" onclick="appendOp('/')">÷</button>
+    <button class="btn-num" onclick="appendNum('7')">7</button>
+    <button class="btn-num" onclick="appendNum('8')">8</button>
+    <button class="btn-num" onclick="appendNum('9')">9</button>
+    <button class="btn-op" onclick="appendOp('*')">×</button>
+    <button class="btn-num" onclick="appendNum('4')">4</button>
+    <button class="btn-num" onclick="appendNum('5')">5</button>
+    <button class="btn-num" onclick="appendNum('6')">6</button>
+    <button class="btn-op" onclick="appendOp('-')">−</button>
+    <button class="btn-num" onclick="appendNum('1')">1</button>
+    <button class="btn-num" onclick="appendNum('2')">2</button>
+    <button class="btn-num" onclick="appendNum('3')">3</button>
+    <button class="btn-op" onclick="appendOp('+')">+</button>
+    <button class="btn-num btn-zero" onclick="appendNum('0')">0</button>
+    <button class="btn-num" onclick="appendDot()">.</button>
+    <button class="btn-eq" onclick="calculate()">=</button>
+  </div>
+</div>
+<script>
+  let deferredPrompt=null;
+  const banner=document.getElementById('install-banner');
+  const installBtn=document.getElementById('install-btn');
+  const dismissBtn=document.getElementById('dismiss-btn');
+  window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;banner.style.display='flex';});
+  installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;banner.style.display='none';});
+  dismissBtn.addEventListener('click',()=>{banner.style.display='none';});
+  window.addEventListener('appinstalled',()=>{banner.style.display='none';});
+  let current='',justCalculated=false;
+  const resultEl=document.getElementById('result');
+  const expressionEl=document.getElementById('expression');
+  function updateDisplay(val){resultEl.textContent=val||'0';}
+  function appendNum(num){if(justCalculated){current='';justCalculated=false;}if(current.length>=18)return;current+=num;updateDisplay(fmt(current));}
+  function appendOp(op){justCalculated=false;if(current===''&&op!=='-')return;if(current&&'+-*/%'.includes(current.slice(-1)))current=current.slice(0,-1);current+=op;updateDisplay(fmt(current));}
+  function appendDot(){if(justCalculated){current='0';justCalculated=false;}const parts=current.split(/[+\-*/%]/);const last=parts[parts.length-1];if(last.includes('.'))return;if(last==='')current+='0';current+='.';updateDisplay(fmt(current));}
+  function clearAll(){current='';expressionEl.textContent='';updateDisplay('0');justCalculated=false;}
+  function backspace(){if(justCalculated){clearAll();return;}current=current.slice(0,-1);updateDisplay(fmt(current)||'0');}
+  function calculate(){if(!current)return;try{const expr=current.replace(/(\d+\.?\d*)%/g,'($1/100)');expressionEl.textContent=fmt(current)+' =';let res=Function('"use strict";return ('+expr+')')();res=parseFloat(res.toFixed(10));updateDisplay(res);current=String(res);justCalculated=true;}catch{updateDisplay('Xato');current='';justCalculated=true;}}
+  function fmt(str){return str.replace(/\*/g,'×').replace(/\//g,'÷').replace(/-/g,'−');}
+  document.addEventListener('keydown',(e)=>{if(e.key>='0'&&e.key<='9')appendNum(e.key);else if(e.key==='+')appendOp('+');else if(e.key==='-')appendOp('-');else if(e.key==='*')appendOp('*');else if(e.key==='/'){e.preventDefault();appendOp('/');}else if(e.key==='%')appendOp('%');else if(e.key==='.')appendDot();else if(e.key==='Enter'||e.key==='=')calculate();else if(e.key==='Backspace')backspace();else if(e.key==='Escape')clearAll();});
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+</script>
+</body>
+</html>
